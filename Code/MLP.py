@@ -4,23 +4,12 @@ import pandas as pd
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import DataSet
 
-dataRoot = "D:\\CodingProject\\PyCharmProject\\DataMiningProject\\Data\\csv"
+
+data,label = DataSet.dataset()
 
 num_classes = 8
-
-datas = []
-labels = []
-for dataCsv in os.listdir(dataRoot):
-    df = pd.read_csv(os.path.join(dataRoot, dataCsv))
-    datas.append(df.iloc[:, :-1].values)
-    labels.append(df.iloc[:, -1].values.reshape((-1, 1)))
-
-data = np.vstack((datas[0], datas[1]))
-label = np.vstack((labels[0], labels[1]))
-for i in range(2, len(datas)):
-    data = np.vstack((data, datas[i]))
-    label = np.vstack((label, labels[i]))
 
 label = np.eye(num_classes)[label.reshape(-1).astype(np.int8)]
 
@@ -84,6 +73,11 @@ for epoch_num in range(epoch_num):
             print('    Test:cost={:.9f},accuracy={:.5f}'.format(total_test_cost, total_test_accuracy))
         if epoch_num % record_step == 0:
             cost_summary.append({'epoch': epoch_num + 1, 'cost': total_cost})
+
+dataRoot = "D:\\CodingProject\\PyCharmProject\\DataMiningProject\\"
+saver = tf.train.Saver()
+save_path = dataRoot + '\\model\\MLP\\'
+saver.save(sess,save_path + "mlp.ckpt")
 
 f, ax1 = plt.subplots(1, 1, figsize=(10, 4))
 ax1.plot(list(map(lambda x: x['epoch'], cost_summary)), list(map(lambda x: x['cost'], cost_summary)))
