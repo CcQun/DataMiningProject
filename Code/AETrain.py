@@ -1,5 +1,4 @@
 import os
-import numpy as np
 import tensorflow as tf
 # 为显示中文，导入中文字符集
 import matplotlib.font_manager as fm

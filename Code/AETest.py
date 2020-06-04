@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import tensorflow as tf
 # 为显示中文，导入中文字符集
@@ -100,14 +99,24 @@ def getScope(filename):
 
 
 def getMses(filename):
-    df = pd.read_csv(filename).iloc[:, :-1]
-    data60 = df.loc[160:220].values
-    data200 = df.loc[220:300].values
-    R1 = np.mean(model.transform(data60), axis=0)
-    R2s = model.transform(data200)
-    means = (R2s - R1) ** 2
-    mse = np.sum(means, axis=1)
-    return mse
+    if filename == path + 'Normal-Data':
+        df = pd.read_csv(filename).iloc[:, :-1]
+        data60 = df.loc[160:220].values
+        data200 = df.loc[220:300].values
+        R1 = np.mean(model.transform(data60), axis=0)
+        R2s = model.transform(data200)
+        means = (R2s - R1) ** 2
+        mse = np.sum(means, axis=1)
+        return mse
+    else:
+        df = pd.read_csv(filename).iloc[:, :-1]
+        data60 = df.loc[0:60].values
+        data200 = df.loc[60:300].values
+        R1 = np.mean(model.transform(data60), axis=0)
+        R2s = model.transform(data200)
+        means = (R2s - R1) ** 2
+        mse = np.sum(means, axis=1)
+        return mse
 
 
 path = dataRoot + '\\Data\\csv\\'
@@ -130,9 +139,6 @@ print('combScope:', combScope)
 print('innerScope:', innerScope)
 print('normScope:', normScope)
 print('outerScope:', outerScope)
-
-# print('outerScope', outerScope)
-
 
 Mses = {
     'ball1Mse': getMses(path + 'Ball Fault Level1'),
