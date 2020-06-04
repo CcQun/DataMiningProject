@@ -9,6 +9,7 @@ import pandas as pd
 
 dataRoot = "D:\\CodingProject\\PyCharmProject\\DataMiningProject\\"
 
+
 class Autoencoder(object):
     def __init__(self, n_hidden_1, n_hidden_2, n_input, learning_rate, scale=0.1):
         self.training_scale = scale
@@ -82,28 +83,31 @@ class Autoencoder(object):
         saver.restore(self.sess, model_path)
 
 
-save_path = dataRoot + '\\model\\'
+save_path = dataRoot + 'model\\AE\\'
 model = Autoencoder(n_hidden_1=210, n_hidden_2=60, n_input=408, learning_rate=0.01)
-model.restore(save_path + "module1.ckpt")
+model.restore(save_path + "ae.ckpt")
 
 
 def getScope(filename):
     df = pd.read_csv(filename).iloc[:, :-1]
     data60 = df.loc[:60].values
-    data200 = df.loc[60:260].values
+    data200 = df.loc[60:160].values
     R1 = np.mean(model.transform(data60), axis=0)
     R2s = model.transform(data200)
     means = (R2s - R1) ** 2
     mse = np.sum(means, axis=1)
-    return min(mse) * 10, max(mse) * 10
+    return min(mse), max(mse)
 
-# def getScope(filename):
-#     df = pd.read_csv(filename).iloc[:, :-1]
-#     data200 = df.loc[:200].values
-#     cost = []
-#     for i in data200:
-#         cost.append(model.calc_total_cost(i.reshape((1,-1))))
-#     return min(cost) * 1000, max(cost) * 1000
+
+def getMses(filename):
+    df = pd.read_csv(filename).iloc[:, :-1]
+    data60 = df.loc[160:220].values
+    data200 = df.loc[220:300].values
+    R1 = np.mean(model.transform(data60), axis=0)
+    R2s = model.transform(data200)
+    means = (R2s - R1) ** 2
+    mse = np.sum(means, axis=1)
+    return mse
 
 
 path = dataRoot + '\\Data\\csv\\'
@@ -118,11 +122,39 @@ innerScope = getScope(path + 'Inner Race Fault')
 normScope = getScope(path + 'Normal-Data')
 outerScope = getScope(path + 'Outer Race Fault')
 
-print('ball1Scope', ball1Scope)
-print('ball2Scope', ball2Scope)
-print('ball3Scope', ball3Scope)
-print('ball4Scope', ball4Scope)
-print('combScope', combScope)
-print('innerScope', innerScope)
-print('normScope', normScope)
-print('outerScope', outerScope)
+print('ball1Scope:', ball1Scope)
+print('ball2Scope:', ball2Scope)
+print('ball3Scope:', ball3Scope)
+print('ball4Scope:', ball4Scope)
+print('combScope:', combScope)
+print('innerScope:', innerScope)
+print('normScope:', normScope)
+print('outerScope:', outerScope)
+
+# print('outerScope', outerScope)
+
+
+Mses = {
+    'ball1Mse': getMses(path + 'Ball Fault Level1'),
+    'ball2Mse': getMses(path + 'Ball Fault Level2'),
+    'ball3Mse': getMses(path + 'Ball Fault Level3'),
+    'ball4Mse': getMses(path + 'Ball Fault Level4'),
+    'combMse ': getMses(path + 'Combination Fault'),
+    'innerMse': getMses(path + 'Inner Race Fault'),
+    'normMse': getMses(path + 'Normal-Data'),
+    'outerMse': getMses(path + 'Outer Race Fault')
+}
+
+correct_num = 0
+all_num = 0
+for mse in Mses.values():
+    for j in mse:
+        if j > normScope[0] and j < normScope[1]:
+            all_num += 1
+        else:
+            correct_num += 1
+            all_num += 1
+
+print('测试正确的个数:', correct_num)
+print('总共测试的记录数:', all_num)
+print('准确率为:', correct_num / all_num * 100, '%')

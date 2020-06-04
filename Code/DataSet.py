@@ -4,8 +4,8 @@ import os
 
 dataRoot = "D:\\CodingProject\\PyCharmProject\\DataMiningProject\\Data\\csv"
 
-def dataset():
 
+def dataset():
     datas = []
     labels = []
     for dataCsv in os.listdir(dataRoot):
@@ -18,4 +18,4 @@ def dataset():
     for i in range(2, len(datas)):
         data = np.vstack((data, datas[i]))
         label = np.vstack((label, labels[i]))
-    return data,label
+    return data, label
